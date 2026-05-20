@@ -5,7 +5,7 @@ Scanning : cek port, deteksi os , dan mencari versi aplikasi yang rentan pada ta
 
 ---
 
-jurnal ini berisi *networking reconnaissance*
+jurnal ini berisi *networking reconnaissance* serta pengenalan tools nmap -ilmsystem
 
 ## ─── 🧭 TAHAP 1: IDENTIFIKASI IP & INTERFACE LOKAL ───
 
