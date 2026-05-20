@@ -1,0 +1,52 @@
+disini kita bakalan cobain tools wifite singkatnya untuk audit keamanan jaringan nirkabel secara otomasi
+tool ini membungkus beberapa tool berat seperti `aircrack-ng` `reavery` bully`
+# Modul 02: Panduan Operasional Wireless Auditing menggunakan Wifite
+
+Jurnal ini mendokumentasikan tata cara melakukan audit keamanan jaringan nirkabel (Wi-Fi) secara otomatis menggunakan tool Wifite di Parrot OS.
+
+---
+
+## ─── 📡 TAHAP 1: PERSIAPAN INTERFACE (MONITOR MODE) ───
+
+Sebelum menjalankan Wifite, *Wireless Card* pada laptop harus diubah dari **Managed Mode** (mode standar untuk internetan) menjadi **Monitor Mode** (mode untuk mengendus paket data di udara). Wifite sebenarnya bisa melakukan ini otomatis, namun melakukannya secara manual jauh lebih stabil untuk meminimalisir error driver.
+
+### 1. Cek Nama Interface Wireless
+```bash
+iwconfig
+```
+2. Mematikan Proses yang Mengganggu
+​Layanan jaringan bawaan OS sering kali mengunci interface dan menyebabkan kegagalan injection. Matikan proses tersebut dengan:
+`sudo airmon-ng check kill`
+─── 📊 TAHAP 2: EKSEKUSI & TARGETING WIFITE ───
+​1. Menjalankan Wifite Dasar
+​Jalankan perintah ini dengan hak akses root untuk memulai pemindaian sinyal Wi-Fi di sekitar kamu:
+```bash
+sudo wifite
+```2. Proses Pemindaian (Scanning)
+​Setelah berjalan, Wifite akan menampilkan daftar Wi-Fi yang tertangkap secara real-time.
+​Kolom NUM adalah nomor urut target.
+​Kolom CH adalah channel frekuensi Wi-Fi.
+​Kolom ENCR menampilkan jenis enkripsi target (WPA2, WPA3, WEP, atau WPS).
+​Langkah Kerja: Biarkan proses memindai selama beberapa menit sampai targetmu muncul. Jika dirasa sudah cukup, tekan Ctrl + C pada keyboard untuk menghentikan pemindaian dan masuk ke menu pemilihan target.
+​3. Memilih Target
+​Terminal akan memunculkan perintah [+] Select target(s) (1-X).
+​Ketik nomor urut target yang ingin kamu audit (misal: 3), lalu tekan Enter.
+​Jika ingin mengaudit semua target yang menggunakan enkripsi WPA secara otomatis, ketik: all
+​─── 🛠️ TAHAP 3: BEDAH ISTILAH & METODE SERANGAN WIFITE ───
+​Saat kamu memilih target, Wifite akan mengeksekusi beberapa jenis serangan berdasarkan tipe keamanan Wi-Fi tersebut. Berikut adalah rincian serangan yang wajib dipahami:
+​1. WPA/WPA2 Handshake Capture (Serangan Utama)
+​Metode ini digunakan untuk mencuri salinan kunci enkripsi saat ada perangkat lain (Client) yang terhubung ke Wi-Fi target.
+​Mekanisme Kerja (Deauthentication Attack): Wifite akan mengirimkan paket deauth palsu untuk memutuskan koneksi target (Client) dari Wi-Fi secara paksa selama beberapa detik. Saat perangkat Client tersebut mencoba terhubung kembali otomatis, Wifite akan mengendus dan menangkap proses jabat tangan (4-Way Handshake) yang berisi enkripsi kata sandi.
+​Output: Hasil tangkapan akan disimpan dalam file berformat .cap atau .hc22000 di direktori /home/hs/ atau folder default Wifite. File inilah yang nantinya akan kita bawa ke Folder 03 untuk dijebol menggunakan serangan kamus (Dictionary Attack).
+​2. WPS Attack (Pixie-Dust / PIN Brute Force)
+​Jika target mengaktifkan fitur WPS (Wi-Fi Protected Setup), Wifite akan mencoba mengeksploitasi celah pada PIN WPS tanpa perlu menunggu Handshake Client.
+​Pixie-Dust Attack (--pixie): Serangan efisien yang memanfaatkan kelemahan pengacakan kode (entropy) pada router lama untuk mendapatkan kata sandi dalam hitungan detik.
+​PIN Brute Force: Mencoba kombinasi PIN standar satu per satu. Metode ini lambat dan berisiko membuat router target lockout (mengunci diri).
+​─── 🛑 PERINTAH ADVANCED (KUSTOMISASI SERANGAN) ───
+​[!NOTE]
+Untuk menghemat resource laptop dan mempercepat proses di lapangan, gunakan parameter kustom agar Wifite bekerja secara spesifik.
+
+hanya berburu wpa : `--wpa`
+hanya berburu mac : `--mac`
+mengatur waktu tunggu serangan : --pillage --tt 600
+---
